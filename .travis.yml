@@ -1,15 +1,23 @@
-name: Deploy Frontend
-on:
-  push:
-    branches:
-      - main
+sudo: required
+language: generic
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-      - run: docker build -t wentworthm/docker-react -f Dockerfile.dev .
-      - run: docker run -e CI=true wentworthm/docker-react npm test
-      
+services:
+  - docker
+
+before_install:
+  - docker build -t wentworthm/docker-react -f Dockerfile.dev .
+
+script:
+  - docker run -e CI=true wentworthm/docker-react npm run test -- --coverage
+
+deploy:
+  provider: elasticbeanstalk
+  region: "us-east-1"
+  app: "frontend"
+  env: "Frontend-env"
+  bucket_name: "elasticbeanstalk-us-east-1-327976362515"
+  bucket_path: "frontend"
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
