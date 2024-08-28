@@ -9,3 +9,4 @@ before_install:
 
 script:
   - docker run -e CI=true wentworthm/docker-react npm run test
+
